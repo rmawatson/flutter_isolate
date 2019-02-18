@@ -4,11 +4,19 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 
-void main() => runApp(MyApp());
+void isolate1(String arg) {
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
+  Timer.periodic(Duration(seconds:1),(timer)=>print("Time Running From Isolate"));
+}
+
+void main() async {
+
+  final isolate = await FlutterIsolate.spawn(isolate1, "hello");
+  Timer(Duration(seconds:5), ()=>isolate.pause());
+  Timer(Duration(seconds:10),()=>isolate.resume());
+  Timer(Duration(seconds:20),()=>isolate.kill());
+
+  runApp(MyApp());
 }
 
 class _MyAppState extends State<MyApp> {

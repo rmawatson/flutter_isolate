@@ -1,4 +1,4 @@
-group 'com.example.flutterisolate'
+group 'com.rmawatson.flutterisolate'
 version '1.0-SNAPSHOT'
 
 buildscript {
