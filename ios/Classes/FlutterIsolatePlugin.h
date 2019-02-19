@@ -1,4 +1,6 @@
 #import <Flutter/Flutter.h>
 
-@interface FlutterIsolatePlugin : NSObject<FlutterPlugin>
+#define FLUTTER_ISOLATE_NAMESPACE @"com.rmawatson.flutterisolate"
+
+@interface FlutterIsolatePlugin : NSObject<FlutterPlugin,FlutterStreamHandler>
 @end

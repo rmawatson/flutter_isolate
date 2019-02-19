@@ -48,9 +48,8 @@ public class FlutterIsolatePlugin implements MethodCallHandler, StreamHandler{
   public static void registerWith(Registrar registrar) {
     if (FlutterIsolatePlugin.registrar == null) { // main isolates registrar
       FlutterIsolatePlugin.registrar = registrar;
+      new FlutterIsolatePlugin(registrar);
     }
-    new FlutterIsolatePlugin(registrar);
-
   }
 
   FlutterIsolatePlugin(Registrar registrar)
