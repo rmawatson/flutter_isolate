@@ -118,7 +118,7 @@ class FlutterIsolate {
       setupSubscription = setupReceivePort.listen((data) {
         final args = data as List<Object>;
         final int userEntryPointHandle = args[0];
-        final String userMessage = args[1];
+        final userMessage = args[1];
         Function userEntryPoint = PluginUtilities.getCallbackFromHandle(
             CallbackHandle.fromRawHandle(userEntryPointHandle));
         setupSubscription.cancel();
