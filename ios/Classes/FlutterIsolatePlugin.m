@@ -23,6 +23,7 @@ static FlutterIsolatePlugin* instance = nil;
 @property FlutterEventSink sink;
 @end
 
+
 @interface GeneratedPluginRegistrant : NSObject
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 @end
@@ -34,6 +35,26 @@ static FlutterIsolatePlugin* instance = nil;
         instance = [[FlutterIsolatePlugin alloc] init:registrar];
     }
 }
+
++ (Class)lookupGeneratedPluginRegistrant {
+
+    Class class = nil;
+    Class * classes = NULL;
+    int classCount = objc_getClassList(NULL, 0);
+    if (classCount) {
+        classes = (Class*) malloc(sizeof(Class) * classCount);
+        classCount = objc_getClassList(classes, classCount);
+        for (int i = 0; i < classCount; i++) {
+            const char* name = class_getName(classes[i]);
+            if (strcmp(name,"GeneratedPluginRegistrant") == 0){
+                class = classes[i];
+            }
+        }
+        free(classes);
+    }
+    return class;
+}
+
 
 - (instancetype)init:(NSObject<FlutterPluginRegistrar>*)registrar {
 
@@ -54,7 +75,7 @@ static FlutterIsolatePlugin* instance = nil;
     IsolateHolder *isolate = _queuedIsolates.firstObject;
 
     FlutterCallbackInformation *info = [FlutterCallbackCache lookupCallbackInformation:isolate.entryPoint];
-    
+
     isolate.engine = [FlutterEngine alloc];
     if ([isolate.engine respondsToSelector:@selector(initWithName:project:allowHeadlessExecution:)]) {
         ((id(*)(id,SEL,id,id,id))objc_msgSend)(isolate.engine, @selector(initWithName:project:allowHeadlessExecution:) , isolate.isolateId, nil, @(YES));
@@ -77,7 +98,8 @@ static FlutterIsolatePlugin* instance = nil;
 
     [isolate.startupChannel setStreamHandler:self];
     [_registrar addMethodCallDelegate:self channel:isolate.controlChannel];
-    [GeneratedPluginRegistrant registerWithRegistry:isolate.engine];
+
+    [[FlutterIsolatePlugin lookupGeneratedPluginRegistrant] registerWithRegistry:isolate.engine];
 }
 
 
