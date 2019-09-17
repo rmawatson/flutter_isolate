@@ -4,6 +4,8 @@ import 'dart:ui';
 
 import 'package:uuid/uuid.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
 
 class FlutterIsolate {
   /// Control port used to send control messages to the isolate.
@@ -20,6 +22,7 @@ class FlutterIsolate {
   /// plugins. T can be any type that can be normally be passed through to
   /// regular isolate's entry point.
   static Future spawn<T>(void entryPoint(T message), T message) async {
+    WidgetsFlutterBinding.ensureInitialized();
     final userEntryPointId =
         PluginUtilities.getCallbackHandle(entryPoint).toRawHandle();
     final isolateId = Uuid().v4();
@@ -98,6 +101,7 @@ class FlutterIsolate {
 
   static get current => _current != null ? _current : FlutterIsolate._();
   static void _isolateInitialize() {
+    WidgetsFlutterBinding.ensureInitialized();
     window.onPlatformMessage = BinaryMessages.handlePlatformMessage;
 
     StreamSubscription eventSubscription;
