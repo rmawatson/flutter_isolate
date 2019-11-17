@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:uuid/uuid.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class FlutterIsolate {
@@ -98,6 +99,7 @@ class FlutterIsolate {
 
   static get current => _current != null ? _current : FlutterIsolate._();
   static void _isolateInitialize() {
+    WidgetsFlutterBinding.ensureInitialized();
     window.onPlatformMessage = BinaryMessages.handlePlatformMessage;
 
     StreamSubscription eventSubscription;
