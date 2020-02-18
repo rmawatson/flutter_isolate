@@ -36,7 +36,15 @@ static FlutterIsolatePlugin* instance = nil;
     }
 }
 
+static NSString* _isolatePluginRegistrantClassName;
++ (NSString*)isolatePluginRegistrantClassName { return _isolatePluginRegistrantClassName; }
++ (void)setIsolatePluginRegistrantClassName:(NSString*)value { _isolatePluginRegistrantClassName = value; }
+
 + (Class)lookupGeneratedPluginRegistrant {
+    const char* classNameToCompare = "GeneratedPluginRegistrant";
+    if (_isolatePluginRegistrantClassName != nil) {
+        classNameToCompare = [_isolatePluginRegistrantClassName UTF8String];
+    }
 
     Class class = nil;
     Class * classes = NULL;
@@ -46,7 +54,7 @@ static FlutterIsolatePlugin* instance = nil;
         classCount = objc_getClassList(classes, classCount);
         for (int i = 0; i < classCount; i++) {
             const char* name = class_getName(classes[i]);
-            if (strcmp(name,"GeneratedPluginRegistrant") == 0){
+            if (strcmp(name, classNameToCompare) == 0){
                 class = classes[i];
             }
         }

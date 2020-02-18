@@ -54,4 +54,43 @@ Due to a FlutterIsolate being backed by a platform specific 'view', the event lo
 
 Additionally this plugin has not been tested with a large range of plugins, only a small subset I have been using such as flutter_notification, flutter_blue and flutter_startup.
 
+### iOS - Custom plugin registrant
 
+By default, `flutter_isolate` will register all plugins provided by Flutter's automatically generated `GeneratedPluginRegistrant.m` file.
+
+If you want to register, e.g. some custom `FlutterMethodChannel`s, you can define a custom registrant:
+
+```swift
+// Defines a custom plugin registrant, to be used specifically together with FlutterIsolatePlugin
+@objc(IsolatePluginRegistrant) class IsolatePluginRegistrant: NSObject {
+    @objc static func register(withRegistry registry: FlutterPluginRegistry) {
+        // Register channels for Flutter Isolate
+        registerMethodChannelABC(bm: registry.registrar(forPlugin: "net.myapp.myChannelABC").messenger())
+
+        // Register default plugins
+        GeneratedPluginRegistrant.register(with: registry)
+    }
+}
+
+// In AppDelegate.swift
+@UIApplicationMain
+@objc class AppDelegate: FlutterAppDelegate {
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        let controller = window.rootViewController as! FlutterViewController
+
+        // Register custom channels for Flutter
+        registerMethodChannelABC(bm: controller.binaryMessenger) // <-- the custom method channel
+
+        // Point FlutterIsolatePlugin to use our previously defined custom registrant.
+        // The string content must be equal to the plugin registrant class annotation 
+        // value: @objc(IsolatePluginRegistrant)
+        FlutterIsolatePlugin.isolatePluginRegistrantClassName = "IsolatePluginRegistrant" // <--
+
+        GeneratedPluginRegistrant.register(with: self)
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+}
+```
