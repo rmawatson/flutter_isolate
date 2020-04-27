@@ -210,8 +210,9 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
             if (activeIsolates.get(isolateId).engine == null)
                 activeIsolates.get(isolateId).view.destroy();
-            else
-                activeIsolates.get(isolateId).engine.destroy();
+            activeIsolates.get(isolateId).engine.destroy();
+            activeIsolates.get(isolateId).engine.destroy();
+
             activeIsolates.remove(isolateId);
 
             context = null;
