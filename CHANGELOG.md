@@ -1,3 +1,7 @@
+## 1.0.0+13
+
+* Null Context bug fix on Android.
+
 ## 1.0.0+12
 
 * v1 embedding support on Android
