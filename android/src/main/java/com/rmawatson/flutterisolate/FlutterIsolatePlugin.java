@@ -88,12 +88,12 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         }
     }
 
-    private static void registerWithRegistrantV2(io.flutter.embedding.engine.FlutterEngine flutterEngine) {
+    private static void registerWithRegistrantV2(FlutterPluginBinding flutterPluginBinding) {
         try {
             Class registrant = FlutterIsolatePlugin.registrant == null ?
                     Class.forName("io.flutter.plugins.GeneratedPluginRegistrant") :
                     FlutterIsolatePlugin.registrant;
-            registrant.getMethod("registerWith", io.flutter.embedding.engine.FlutterEngine.class).invoke(null, flutterEngine);
+            registrant.getMethod("registerWith", FlutterPluginBinding.class).invoke(null, flutterPluginBinding);
         } catch (ClassNotFoundException classNotFoundException) {
             String error = classNotFoundException.getClass().getSimpleName()
                     + ": " + classNotFoundException.getMessage() + "\n" +
@@ -103,7 +103,7 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         } catch (NoSuchMethodException noSuchMethodException) {
             String error = noSuchMethodException.getClass().getSimpleName()
                     + ": " + noSuchMethodException.getMessage() + "\n" +
-                    "The plugin registrant must provide a static registerWith(io.flutter.embedding.engine.FlutterEngine) method";
+                    "The plugin registrant must provide a static registerWith(FlutterPluginBinding) method";
             android.util.Log.e("FlutterIsolate", error);
             return;
         } catch (InvocationTargetException invocationException) {
@@ -197,7 +197,7 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
             registerWithRegistrant(isolate.view.getPluginRegistry());
             isolate.view.runFromBundle(runArgs);
         } else {
-            registerWithRegistrantV2(isolate.engine);
+            registerWithRegistrantV2(flutterPluginBinding);
             DartExecutor.DartCallback dartCallback = new DartExecutor.DartCallback(context.getAssets(), runArgs.bundlePath, cbInfo);
             isolate.engine.getDartExecutor().executeDartCallback(dartCallback);
         }
