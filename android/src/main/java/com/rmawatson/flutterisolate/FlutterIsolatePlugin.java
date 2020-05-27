@@ -89,17 +89,10 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
     }
 
     private static void registerWithRegistrantV2(FlutterEngine flutterEngine) {
+        if (registrant == null) return;
+
         try {
-            Class registrant = FlutterIsolatePlugin.registrant == null ?
-                    Class.forName("io.flutter.plugins.GeneratedPluginRegistrant") :
-                    FlutterIsolatePlugin.registrant;
-            registrant.getMethod("registerWith", FlutterEngine.class).invoke(null, flutterEngine);
-        } catch (ClassNotFoundException classNotFoundException) {
-            String error = classNotFoundException.getClass().getSimpleName()
-                    + ": " + classNotFoundException.getMessage() + "\n" +
-                    "Unable to find the default GeneratedPluginRegistrant.";
-            android.util.Log.e("FlutterIsolate", error);
-            return;
+            FlutterIsolatePlugin.registrant.getMethod("registerWith", FlutterEngine.class).invoke(null, flutterEngine);
         } catch (NoSuchMethodException noSuchMethodException) {
             String error = noSuchMethodException.getClass().getSimpleName()
                     + ": " + noSuchMethodException.getMessage() + "\n" +
