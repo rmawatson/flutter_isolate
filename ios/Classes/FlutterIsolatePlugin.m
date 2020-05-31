@@ -4,7 +4,7 @@
 @interface IsolateHolder : NSObject
 @property(nonatomic) FlutterEngine* engine;
 @property(nonatomic) NSString* isolateId;
-@property(nonatomic) long entryPoint;
+@property(nonatomic) long long entryPoint;
 @property(nonatomic) FlutterResult result;
 @property(nonatomic) FlutterEventChannel* startupChannel;
 @property(nonatomic) FlutterMethodChannel* controlChannel;
@@ -109,7 +109,7 @@ static FlutterIsolatePlugin* instance = nil;
   if ([@"spawn_isolate" isEqualToString:call.method]) {
       IsolateHolder* isolate = [IsolateHolder new];
 
-      isolate.entryPoint = [[call.arguments objectForKey:@"entry_point"] longValue];
+      isolate.entryPoint = [[call.arguments objectForKey:@"entry_point"] longLongValue];
       isolate.isolateId = [call.arguments objectForKey:@"isolate_id"];
       isolate.result = result;
 
