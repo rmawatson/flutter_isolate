@@ -100,7 +100,7 @@ class FlutterIsolate {
   static get current => _current != null ? _current : FlutterIsolate._();
   static void _isolateInitialize() {
     WidgetsFlutterBinding.ensureInitialized();
-    window.onPlatformMessage = BinaryMessages.handlePlatformMessage;
+    window.onPlatformMessage = BinaryMessenger.handlePlatformMessage;
 
     StreamSubscription eventSubscription;
     eventSubscription = _event.receiveBroadcastStream().listen((isolateId) {
