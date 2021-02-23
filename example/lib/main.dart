@@ -22,49 +22,28 @@ void isolate1(String arg) async {
 }
 
 void main() async {
-  final isolate = await FlutterIsolate.spawn(isolate1, "hello");
-  Timer(Duration(seconds: 5), () {
-    print("Pausing Isolate 1");
-    isolate.pause();
-  });
-  Timer(Duration(seconds: 10), () {
-    print("Resuming Isolate 1");
-    isolate.resume();
-  });
-  Timer(Duration(seconds: 20), () {
-    print("Killing Isolate 1");
-    isolate.kill();
-  });
-
   runApp(MyApp());
 }
 
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-
+class MyApp extends StatefulWidget {
   @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
+  _MyAppState createState() => _MyAppState();
+}
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      platformVersion = await FlutterIsolate.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
+class _MyAppState extends State<MyApp> {
+  Future<void> _run() async {
+    final isolate = await FlutterIsolate.spawn(isolate1, "hello");
+    Timer(Duration(seconds: 5), () {
+      print("Pausing Isolate 1");
+      isolate.pause();
+    });
+    Timer(Duration(seconds: 10), () {
+      print("Resuming Isolate 1");
+      isolate.resume();
+    });
+    Timer(Duration(seconds: 20), () {
+      print("Killing Isolate 1");
+      isolate.kill();
     });
   }
 
@@ -76,7 +55,11 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          // TODO: deprecated
+          child: RaisedButton(
+            child: Text('Run'),
+            onPressed: _run,
+          ),
         ),
       ),
     );
