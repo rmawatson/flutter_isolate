@@ -1,3 +1,9 @@
+## 1.0.0+15
+
+* Fix Git example and README example.
+* Update gradle/sdk dependencies. 
+* Remove deprecated BinaryMessages API.
+
 ## 1.0.0+14
 
 * Overflow bug fix on iOS.
