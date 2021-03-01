@@ -12,7 +12,7 @@ void isolate2(String arg) {
 }
 
 void isolate1(String arg) async {
-  final isolate = await FlutterIsolate.spawn(isolate2, "hello2");
+  /*final isolate =*/ await FlutterIsolate.spawn(isolate2, "hello2");
 
   getTemporaryDirectory().then((dir) {
     print("isolate1 temporary directory: $dir");
@@ -55,8 +55,7 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          // TODO: deprecated
-          child: RaisedButton(
+          child: ElevatedButton(
             child: Text('Run'),
             onPressed: _run,
           ),

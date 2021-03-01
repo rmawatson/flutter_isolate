@@ -1,4 +1,4 @@
-## 2.0.0-nullsafety.0
+## 2.0.0
 
 * Support null safety.
 * Replace flutter_startup by path_provider in example.
