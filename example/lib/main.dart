@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:flutter_startup/flutter_startup.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:path_provider/path_provider.dart';
 
 void isolate2(String arg) {
-  FlutterStartup.startupReason.then((reason) {
-    print("Isolate2 $reason");
+  getTemporaryDirectory().then((dir) {
+    print("isolate2 temporary directory: $dir");
   });
   Timer.periodic(
       Duration(seconds: 1), (timer) => print("Timer Running From Isolate 2"));
 }
 
 void isolate1(String arg) async {
-  final isolate = await FlutterIsolate.spawn(isolate2, "hello2");
+  /*final isolate =*/ await FlutterIsolate.spawn(isolate2, "hello2");
 
-  FlutterStartup.startupReason.then((reason) {
-    print("Isolate1 $reason");
+  getTemporaryDirectory().then((dir) {
+    print("isolate1 temporary directory: $dir");
   });
   Timer.periodic(
       Duration(seconds: 1), (timer) => print("Timer Running From Isolate 1"));
@@ -55,8 +55,7 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          // TODO: deprecated
-          child: RaisedButton(
+          child: ElevatedButton(
             child: Text('Run'),
             onPressed: _run,
           ),
