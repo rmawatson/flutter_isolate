@@ -45,19 +45,15 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
     private Queue<IsolateHolder> queuedIsolates;
     private Map<String, IsolateHolder> activeIsolates;
     private Context context;
-    private FlutterPluginBinding flutterPluginBinding;
-
 
     // V2 Embedding
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {
-        flutterPluginBinding = binding;
         setupChannel(binding.getBinaryMessenger(), binding.getApplicationContext());
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-        flutterPluginBinding = null;
     }
 
 
