@@ -46,7 +46,6 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
     private Map<String, IsolateHolder> activeIsolates;
     private Context context;
 
-    // V2 Embedding
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {
         setupChannel(binding.getBinaryMessenger(), binding.getApplicationContext());
@@ -56,7 +55,6 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     }
 
-
     private void setupChannel(BinaryMessenger messenger, Context context) {
         this.context = context;
         MethodChannel controlChannel = new MethodChannel(messenger, NAMESPACE + "/control");
@@ -65,7 +63,6 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
         controlChannel.setMethodCallHandler(this);
     }
-
 
     private void startNextIsolate() {
         IsolateHolder isolate = queuedIsolates.peek();
@@ -89,12 +86,10 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
         DartExecutor.DartCallback dartCallback = new DartExecutor.DartCallback(context.getAssets(), runArgs.bundlePath, cbInfo);
         isolate.engine.getDartExecutor().executeDartCallback(dartCallback);
-
     }
 
     @Override
     public void onListen(Object o, EventChannel.EventSink sink) {
-
         IsolateHolder isolate = queuedIsolates.remove();
         sink.success(isolate.isolateId);
         sink.endOfStream();
@@ -104,20 +99,18 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         isolate.startupChannel = null;
         isolate.result = null;
 
-        if (queuedIsolates.size() != 0)
+        if (queuedIsolates.size() != 0) {
             startNextIsolate();
-
+        }
     }
 
     @Override
     public void onCancel(Object o) {
-
     }
 
     @Override
     public void onMethodCall(MethodCall call, @NonNull Result result) {
         if (call.method.equals("spawn_isolate")) {
-
             IsolateHolder isolate = new IsolateHolder();
             isolate.entryPoint = call.argument("entry_point");
             isolate.isolateId = call.argument("isolate_id");
@@ -125,11 +118,10 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
             queuedIsolates.add(isolate);
 
-            if (queuedIsolates.size() == 1) // no other pending isolate
+            if (queuedIsolates.size() == 1) {// no other pending isolate
                 startNextIsolate();
-
+            }
         } else if (call.method.equals("kill_isolate")) {
-
             String isolateId = call.argument("isolate_id");
 
             activeIsolates.get(isolateId).engine.destroy();
