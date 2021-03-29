@@ -118,7 +118,7 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
             queuedIsolates.add(isolate);
 
-            if (queuedIsolates.size() == 1) {// no other pending isolate
+            if (queuedIsolates.size() == 1) { // no other pending isolate
                 startNextIsolate();
             }
         } else if (call.method.equals("kill_isolate")) {
@@ -126,7 +126,6 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
             activeIsolates.get(isolateId).engine.destroy();
             activeIsolates.remove(isolateId);
-
         } else {
             result.notImplemented();
         }
