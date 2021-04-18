@@ -74,6 +74,33 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         }
     }
 
+    private static void registerWithRegistrantV2(FlutterEngine flutterEngine) {
+        if (registrant == null) return;
+
+        try {
+            FlutterIsolatePlugin.registrant.getMethod("registerWith", FlutterEngine.class).invoke(null, flutterEngine);
+        } catch (NoSuchMethodException noSuchMethodException) {
+            String error = noSuchMethodException.getClass().getSimpleName()
+                    + ": " + noSuchMethodException.getMessage() + "\n" +
+                    "The plugin registrant must provide a static registerWith(FlutterEngine) method";
+            android.util.Log.e("FlutterIsolate", error);
+            return;
+        } catch (InvocationTargetException invocationException) {
+            Throwable target = invocationException.getTargetException();
+            String error = target.getClass().getSimpleName() + ": " + target.getMessage() + "\n" +
+                    "It is possible the default GeneratedPluginRegistrant is attempting to register\n" +
+                    "a plugin that uses registrar.activity() or a similar method. Flutter Isolates have no\n" +
+                    "access to the activity() from the registrant. If the activity is being use to register\n" +
+                    "a method or event channel, have the plugin use registrar.context() instead. Alternatively\n" +
+                    "use a custom registrant for isolates, that only registers plugins that the isolate needs\n" +
+                    "to use.";
+            android.util.Log.e("FlutterIsolate", error);
+            return;
+        } catch (Exception except) {
+            android.util.Log.e("FlutterIsolate", except.getClass().getSimpleName() + " " + ((InvocationTargetException) except).getTargetException().getMessage());
+        }
+    }
+
     /* This should be used to provides a custom plugin registrant for any FlutterIsolates that are spawned.
      * by copying the GeneratedPluginRegistrant provided by flutter call say "IsolatePluginRegistrant", modifying the
      * list of plugins that are registered (removing the ones you do not want to use from within a plugin) and passing
