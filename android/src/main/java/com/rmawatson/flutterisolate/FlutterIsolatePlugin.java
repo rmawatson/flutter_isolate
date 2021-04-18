@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Queue;
 
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -52,6 +54,7 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
         try {
             FlutterIsolatePlugin.registrant.getMethod("registerWith", FlutterEngine.class).invoke(null, flutterEngine);
+            android.util.Log.i("FlutterIsolate", "Using custom Flutter plugin registrant " + registrant.getCanonicalName());
         } catch (NoSuchMethodException noSuchMethodException) {
             String error = noSuchMethodException.getClass().getSimpleName()
                     + ": " + noSuchMethodException.getMessage() + "\n" +
@@ -111,7 +114,16 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
         FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null);
 
-        isolate.engine = new FlutterEngine(context);
+        if (registrant != null) {
+            isolate.engine = new FlutterEngine(context,
+                    null,
+                    new FlutterJNI(),
+                    null,
+                    false);
+            registerWithRegistrantV2(isolate.engine);
+        } else {
+            isolate.engine = new FlutterEngine(context);
+        }
 
         FlutterCallbackInformation cbInfo = FlutterCallbackInformation.lookupCallbackInformation(isolate.entryPoint);
         FlutterRunArguments runArgs = new FlutterRunArguments();
@@ -126,7 +138,6 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         isolate.startupChannel.setStreamHandler(this);
         isolate.controlChannel.setMethodCallHandler(this);
 
-        registerWithRegistrantV2(isolate.engine);
         DartExecutor.DartCallback dartCallback = new DartExecutor.DartCallback(context.getAssets(), runArgs.bundlePath, cbInfo);
         isolate.engine.getDartExecutor().executeDartCallback(dartCallback);
     }
