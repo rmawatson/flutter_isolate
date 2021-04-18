@@ -1,16 +1,16 @@
 name: flutter_isolate
 description: FlutterIsolate provides a way to launch dart isolate in flutter that work with flutter plugins.
-version: 1.0.0+14
+version: 2.0.0
 homepage: https://github.com/rmawatson/flutter_isolate
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
-  flutter: ">=1.10.0 <2.0.0"
+  sdk: ">=2.12.0-259.9.beta <3.0.0"
+  flutter: ">=1.12.13+hotfix.5"
 
 dependencies:
   flutter:
     sdk: flutter
-  uuid: ^2.0.0
+  uuid: ^3.0.3
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
 

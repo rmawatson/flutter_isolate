@@ -37,6 +37,7 @@ void isolate1(String arg) async  {
 }
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
   final isolate = await FlutterIsolate.spawn(isolate1, "hello");
   Timer(Duration(seconds:5), (){print("Pausing Isolate 1");isolate.pause();});
