@@ -5,10 +5,6 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import java.lang.reflect.InvocationTargetException;
-<<<<<<< HEAD
-
-=======
->>>>>>> 38fb715e0b753f684b9ae577ffe319d9f038e45e
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -117,16 +113,7 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
         FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null);
 
-        if (registrant != null) {
-            isolate.engine = new FlutterEngine(context,
-                    null,
-                    new FlutterJNI(),
-                    null,
-                    false);
-            registerWithRegistrantV2(isolate.engine);
-        } else {
-            isolate.engine = new FlutterEngine(context);
-        }
+        isolate.engine = new FlutterEngine(context);
 
         FlutterCallbackInformation cbInfo = FlutterCallbackInformation.lookupCallbackInformation(isolate.entryPoint);
         FlutterRunArguments runArgs = new FlutterRunArguments();
