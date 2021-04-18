@@ -55,7 +55,11 @@ Due to a FlutterIsolate being backed by a platform specific 'view', the event lo
 
 Additionally this plugin has not been tested with a large range of plugins, only a small subset I have been using such as flutter_notification, flutter_blue and flutter_startup.
 
-### iOS - Custom plugin registrant
+### Custom plugin registrant
+
+See the example project for a sample implementation using a custom plugin registrant.
+
+#### iOS
 
 By default, `flutter_isolate` will register all plugins provided by Flutter's automatically generated `GeneratedPluginRegistrant.m` file.
 
@@ -92,6 +96,26 @@ If you want to register, e.g. some custom `FlutterMethodChannel`s, you can defin
 
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+}
+
+#### Android
+
+Define a custom plugin registrant, to be used specifically together with FlutterIsolatePlugin:
+
+```Java
+public final class CustomPluginRegistrant {
+  public static void registerWith(@NonNull FlutterEngine flutterEngine) {
+    flutterEngine.getPlugins().add(... [your plugin goes here]);
+  }
+}
+```
+
+Create a MainApplication class that sets this custom isolate registrant:
+```Java
+  public class MainApplication extends FlutterApplication {
+    public MainApplication() {
+        FlutterIsolatePlugin.setCustomIsolateRegistrant(CustomPluginRegistrant.class);
     }
 }
 ```
