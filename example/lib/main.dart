@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';

@@ -5,7 +5,10 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import java.lang.reflect.InvocationTargetException;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 38fb715e0b753f684b9ae577ffe319d9f038e45e
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -13,6 +16,7 @@ import java.util.Queue;
 
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -46,12 +50,14 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
     private Queue<IsolateHolder> queuedIsolates;
     private Map<String, IsolateHolder> activeIsolates;
-    private Context context;    
     static private Class registrant;
+    private Context context;
 
     private static void registerWithCustomRegistrant(io.flutter.embedding.engine.FlutterEngine flutterEngine) {
+        if (registrant == null) return;
         try {
-            FlutterIsolatePlugin.registrant.getMethod("registerWith", io.flutter.embedding.engine.FlutterEngine.class).invoke(null, flutterEngine);
+            FlutterIsolatePlugin.registrant.getMethod("registerWith", FlutterEngine.class).invoke(null, flutterEngine);
+            android.util.Log.i("FlutterIsolate", "Using custom Flutter plugin registrant " + registrant.getCanonicalName());
         } catch (NoSuchMethodException noSuchMethodException) {
             String error = noSuchMethodException.getClass().getSimpleName()
                     + ": " + noSuchMethodException.getMessage() + "\n" +
@@ -74,8 +80,8 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         }
     }
 
-    /* This should be used to provides a custom plugin registrant for any FlutterIsolates that are spawned.
-     * by copying the GeneratedPluginRegistrant provided by flutter call say "IsolatePluginRegistrant", modifying the
+    /* This should be used to provide a custom plugin registrant for any FlutterIsolates that are spawned,
+     * by copying the GeneratedPluginRegistrant provided by flutter call, say "IsolatePluginRegistrant", modifying the
      * list of plugins that are registered (removing the ones you do not want to use from within a plugin) and passing
      * the class to setCustomIsolateRegistrant in your MainActivity.
      *
@@ -111,7 +117,16 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
         FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null);
 
-        isolate.engine = new FlutterEngine(context);
+        if (registrant != null) {
+            isolate.engine = new FlutterEngine(context,
+                    null,
+                    new FlutterJNI(),
+                    null,
+                    false);
+            registerWithRegistrantV2(isolate.engine);
+        } else {
+            isolate.engine = new FlutterEngine(context);
+        }
 
         FlutterCallbackInformation cbInfo = FlutterCallbackInformation.lookupCallbackInformation(isolate.entryPoint);
         FlutterRunArguments runArgs = new FlutterRunArguments();
