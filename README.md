@@ -79,4 +79,67 @@ void main() {
 [Only primitives can be sent via a SendPort.](https://api.flutter.dev/flutter/dart-isolate/SendPort/send.html) for further details.
 
 
+### Custom plugin registrant
 
+See the example project for a sample implementation using a custom plugin registrant.
+
+#### iOS
+
+By default, `flutter_isolate` will register all plugins provided by Flutter's automatically generated `GeneratedPluginRegistrant.m` file.
+
+If you want to register, e.g. some custom `FlutterMethodChannel`s, you can define a custom registrant:
+
+```swift
+// Defines a custom plugin registrant, to be used specifically together with FlutterIsolatePlugin
+@objc(IsolatePluginRegistrant) class IsolatePluginRegistrant: NSObject {
+    @objc static func register(withRegistry registry: FlutterPluginRegistry) {
+        // Register channels for Flutter Isolate
+        registerMethodChannelABC(bm: registry.registrar(forPlugin: "net.myapp.myChannelABC").messenger())
+
+        // Register default plugins
+        GeneratedPluginRegistrant.register(with: registry)
+    }
+}
+
+// In AppDelegate.swift
+@UIApplicationMain
+@objc class AppDelegate: FlutterAppDelegate {
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        let controller = window.rootViewController as! FlutterViewController
+
+        // Register custom channels for Flutter
+        registerMethodChannelABC(bm: controller.binaryMessenger) // <-- the custom method channel
+
+        // Point FlutterIsolatePlugin to use our previously defined custom registrant.
+        // The string content must be equal to the plugin registrant class annotation 
+        // value: @objc(IsolatePluginRegistrant)
+        FlutterIsolatePlugin.isolatePluginRegistrantClassName = "IsolatePluginRegistrant" // <--
+
+        GeneratedPluginRegistrant.register(with: self)
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+}
+
+#### Android
+
+Define a custom plugin registrant, to be used specifically together with FlutterIsolatePlugin:
+
+```Java
+public final class CustomPluginRegistrant {
+  public static void registerWith(@NonNull FlutterEngine flutterEngine) {
+    flutterEngine.getPlugins().add(... [your plugin goes here]);
+  }
+}
+```
+
+Create a MainApplication class that sets this custom isolate registrant:
+```Java
+  public class MainApplication extends FlutterApplication {
+    public MainApplication() {
+        FlutterIsolatePlugin.setCustomIsolateRegistrant(CustomPluginRegistrant.class);
+    }
+}
+```
