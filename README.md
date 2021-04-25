@@ -55,4 +55,28 @@ Due to a FlutterIsolate being backed by a platform specific 'view', the event lo
 
 Additionally this plugin has not been tested with a large range of plugins, only a small subset I have been using such as flutter_notification, flutter_blue and flutter_startup.
 
+### Communicating between isolates
+
+To pass data between isolates, a ReceivePort should be created on your (parent) isolate with the corresponding SendPort sent via the isolate constructor:
+
+```
+
+void spawnIsolate(SendPort port) {
+  port.send("Hello!");
+}
+
+void main() {
+  var port = ReceivePort();
+  port.listen((msg) {
+    print("Received message from isolate $msg");
+  });
+  var isolate = await FlutterIsolate.spawn(spawnIsolate, port.sendPort);
+
+}
+
+```
+
+[Only primitives can be sent via a SendPort.](https://api.flutter.dev/flutter/dart-isolate/SendPort/send.html) for further details.
+
+
 
