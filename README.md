@@ -11,9 +11,7 @@ FlutterIsolate allows creation of an Isolate in flutter that is able to use flut
 | flutterIsolate.resume()           | :white_check_mark: |  :white_check_mark:  | resumed a paused isoalte |
 | flutterIsolate.kill()             | :white_check_mark: |  :white_check_mark:  | kills a an isolate |
 
-### Example
-
-This is available in the example included with the package.
+### Usage
 
 ```
 import 'package:flutter_startup/flutter_startup.dart';
@@ -49,6 +47,84 @@ void main() async {
 ...
 ```
 
+See [example/lib/main.dart](https://github.com/rmawatson/flutter_isolate/blob/master/example/lib/main.dart) for example usage with the [flutter_downloader plugin](https://pub.dev/packages/flutter_downloader).
+
+It is important to note that the entrypoint must be a top-level function:
+
+```
+void topLevelFunction(Map<String, dynamic> args) {
+  // performs work in an isolate
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    FlutterIsolate.spawn(topLevelFunction, {});
+    super.initState();
+  }
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+```
+
+or a static method:
+
+```
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  static void topLevelFunction(Map<String, dynamic> args) {
+    // performs work in an isolate
+  }
+
+  @override
+  void initState() {
+    FlutterIsolate.spawn(_MyAppState.staticMethod, {});
+    super.initState();
+  }
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+```
+
+A class-level method will *not* work and will throw an Exception:
+```
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  
+  void classMethod(Map<String, dynamic> args) {
+    // don't do this!
+  }
+
+  @override
+  void initState() {
+    
+    FlutterIsolate.spawn(classMethod, {}); // this will throw NoSuchMethodError: The method 'toRawHandle' was called on null.
+    super.initState();
+  }
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+```
+
 ### Notes
 
 Due to a FlutterIsolate being backed by a platform specific 'view', the event loop will not terminate when there is no more 'user' work left to do and FlutterIsolates will require explict termination with kill().
@@ -57,7 +133,7 @@ Additionally this plugin has not been tested with a large range of plugins, only
 
 ### Communicating between isolates
 
-To pass data between isolates, a ReceivePort should be created on your (parent) isolate with the corresponding SendPort sent via the isolate constructor:
+To pass data between isolates, a ReceivePort should be created on your (parent) isolate with the corresponding SendPort sent via the `spawn` method:
 
 ```
 
@@ -76,7 +152,7 @@ void main() {
 
 ```
 
-[Only primitives can be sent via a SendPort.](https://api.flutter.dev/flutter/dart-isolate/SendPort/send.html) for further details.
+Only primitives can be sent via a SendPort - [see the SendPort documentation for further details](https://api.flutter.dev/flutter/dart-isolate/SendPort/send.html).
 
 
 ### Custom plugin registrant
@@ -122,6 +198,7 @@ If you want to register, e.g. some custom `FlutterMethodChannel`s, you can defin
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 }
+```
 
 #### Android
 
