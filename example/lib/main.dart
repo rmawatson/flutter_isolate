@@ -1,11 +1,21 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 void isolate2(String arg) {
-  getTemporaryDirectory().then((dir) {
+  getTemporaryDirectory().then((dir) async {
     print("isolate2 temporary directory: $dir");
+
+    await FlutterDownloader.initialize(debug: true);
+    FlutterDownloader.registerCallback(_MyAppState.downloaderCallback);
+
+    final taskId = await FlutterDownloader.enqueue(
+        url:
+            "https://raw.githubusercontent.com/rmawatson/flutter_isolate/master/README.md",
+        savedDir: dir.path);
   });
   Timer.periodic(
       Duration(seconds: 1), (timer) => print("Timer Running From Isolate 2"));
@@ -31,7 +41,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  static void downloaderCallback(
+      String id, DownloadTaskStatus status, int progress) {
+    print("progress: $progress");
+  }
+
   Future<void> _run() async {
+    print(
+        "Temp directory in main isolate : ${(await getTemporaryDirectory()).path}");
     final isolate = await FlutterIsolate.spawn(isolate1, "hello");
     Timer(Duration(seconds: 5), () {
       print("Pausing Isolate 1");
