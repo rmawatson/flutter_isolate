@@ -13,7 +13,7 @@ FlutterIsolate allows creation of an Isolate in flutter that is able to use flut
 
 ### Usage
 
-```
+```dart
 import 'package:flutter_startup/flutter_startup.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 
@@ -51,7 +51,7 @@ See [example/lib/main.dart](https://github.com/rmawatson/flutter_isolate/blob/ma
 
 It is important to note that the entrypoint must be a top-level function:
 
-```
+```dart
 void topLevelFunction(Map<String, dynamic> args) {
   // performs work in an isolate
 }
@@ -76,7 +76,7 @@ class _MyAppState extends State<MyApp> {
 
 or a static method:
 
-```
+```dart
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
@@ -100,7 +100,7 @@ class _MyAppState extends State<MyApp> {
 ```
 
 A class-level method will *not* work and will throw an Exception:
-```
+```dart
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
@@ -135,8 +135,7 @@ Additionally this plugin has not been tested with a large range of plugins, only
 
 To pass data between isolates, a ReceivePort should be created on your (parent) isolate with the corresponding SendPort sent via the `spawn` method:
 
-```
-
+```dart
 void spawnIsolate(SendPort port) {
   port.send("Hello!");
 }
@@ -149,7 +148,6 @@ void main() {
   var isolate = await FlutterIsolate.spawn(spawnIsolate, port.sendPort);
 
 }
-
 ```
 
 Only primitives can be sent via a SendPort - [see the SendPort documentation for further details](https://api.flutter.dev/flutter/dart-isolate/SendPort/send.html).
@@ -214,9 +212,9 @@ public final class CustomPluginRegistrant {
 
 Create a MainApplication class that sets this custom isolate registrant:
 ```Java
-  public class MainApplication extends FlutterApplication {
-    public MainApplication() {
-        FlutterIsolatePlugin.setCustomIsolateRegistrant(CustomPluginRegistrant.class);
-    }
+public class MainApplication extends FlutterApplication {
+  public MainApplication() {
+    FlutterIsolatePlugin.setCustomIsolateRegistrant(CustomPluginRegistrant.class);
+  }
 }
 ```
