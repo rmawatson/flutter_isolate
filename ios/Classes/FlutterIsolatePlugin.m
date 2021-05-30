@@ -143,14 +143,16 @@ static NSString* _isolatePluginRegistrantClassName;
 
     IsolateHolder* isolate = _queuedIsolates.firstObject;
 
-    sink(isolate.isolateId);
-    sink(FlutterEndOfEventStream);
-    _activeIsolates[isolate.isolateId] = isolate;
-    [_queuedIsolates removeObject:isolate];
+    if (isolate != nil) {
+        sink(isolate.isolateId);
+        sink(FlutterEndOfEventStream);
+        _activeIsolates[isolate.isolateId] = isolate;
+        [_queuedIsolates removeObject:isolate];
 
-    isolate.result(@(YES));
-    isolate.startupChannel = nil;
-    isolate.result = nil;
+        isolate.result(@(YES));
+        isolate.startupChannel = nil;
+        isolate.result = nil;
+    }
 
     if (_queuedIsolates.count != 0)
         [self startNextIsolate];
