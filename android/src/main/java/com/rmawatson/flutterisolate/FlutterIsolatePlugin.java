@@ -138,14 +138,17 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
     @Override
     public void onListen(Object o, EventChannel.EventSink sink) {
-        IsolateHolder isolate = queuedIsolates.remove();
-        sink.success(isolate.isolateId);
-        sink.endOfStream();
-        activeIsolates.put(isolate.isolateId, isolate);
+        if (queuedIsolates.size() != 0) {
+            IsolateHolder isolate = queuedIsolates.remove();
+        
+            sink.success(isolate.isolateId);
+            sink.endOfStream();
+            activeIsolates.put(isolate.isolateId, isolate);
 
-        isolate.result.success(null);
-        isolate.startupChannel = null;
-        isolate.result = null;
+            isolate.result.success(null);
+            isolate.startupChannel = null;
+            isolate.result = null;
+        }
 
         if (queuedIsolates.size() != 0) {
             startNextIsolate();
