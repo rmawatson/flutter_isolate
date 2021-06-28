@@ -1,3 +1,8 @@
+## 2.0.1-pre
+
+* Fixes for hot reloading
+* Adds support for custom plugin registrant
+
 ## 2.0.0
 
 * Support null safety.
