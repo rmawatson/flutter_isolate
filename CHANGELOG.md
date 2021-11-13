@@ -1,3 +1,6 @@
+## 2.0.2-pre
+* Fix bug on iOS when _isolatePluginRegistrantClassName was empty
+
 ## 2.0.1-pre
 
 * Fixes for hot reloading
