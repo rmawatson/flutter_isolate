@@ -83,9 +83,9 @@ class FlutterIsolate {
   /// even after user code has completed. Thus they must be explicitly
   /// terminate using kill if you wish to dispose of them after you have
   /// finished. This should cleanup the native components backing the isolates.
-  void kill() => _isolateId != null
+  void kill({int priority = beforeNextEvent}) => _isolateId != null
       ? _control.invokeMethod("kill_isolate", {"isolate_id": _isolateId})
-      : Isolate.current.kill();
+      : Isolate.current.kill(priority);
 
   String? _isolateId;
   static FlutterIsolate? _current;
