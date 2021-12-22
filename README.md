@@ -7,9 +7,11 @@ FlutterIsolate allows creation of an Isolate in flutter that is able to use flut
 |                  |      Android       |         iOS          |             Description            |
 | :--------------- | :----------------: | :------------------: |  :-------------------------------- |
 | FlutterIsolate.spawn(entryPoint,message)             | :white_check_mark: |  :white_check_mark:  | spawns a new FlutterIsolate        |
-| flutterIsolate.pause()            | :white_check_mark: |  :white_check_mark:  | pauses a running isolate |
-| flutterIsolate.resume()           | :white_check_mark: |  :white_check_mark:  | resumed a paused isoalte |
-| flutterIsolate.kill()             | :white_check_mark: |  :white_check_mark:  | kills a an isolate |
+| FlutterIsolate.pause()            | :white_check_mark: |  :white_check_mark:  | pauses a running isolate |
+| FlutterIsolate.resume()           | :white_check_mark: |  :white_check_mark:  | resumed a paused isoalte |
+| FlutterIsolate.kill()             | :white_check_mark: |  :white_check_mark:  | kills a an isolate |
+| FlutterIsolate.killAll()             | :white_check_mark: |  :white_check_mark:  | kills all currently running  isolates |
+| FlutterIsolate.runningIsolates             | :white_check_mark: |  :white_check_mark:  | returns the IDs associated with all currently running isolates |
 
 ### Usage
 
