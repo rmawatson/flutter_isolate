@@ -5,14 +5,17 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
-import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -43,10 +46,9 @@ class IsolateHolder {
 public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, StreamHandler {
 
     public static final String NAMESPACE = "com.rmawatson.flutterisolate";
-
+    static private Class<?> registrant;
     private Queue<IsolateHolder> queuedIsolates;
     private Map<String, IsolateHolder> activeIsolates;
-    static private Class registrant;
     private Context context;
 
     private static void registerWithCustomRegistrant(io.flutter.embedding.engine.FlutterEngine flutterEngine) {
@@ -128,10 +130,10 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         isolate.startupChannel.setStreamHandler(this);
         isolate.controlChannel.setMethodCallHandler(this);
 
-        if(registrant != null) {
+        if (registrant != null) {
             registerWithCustomRegistrant(isolate.engine);
         }
-        
+
         DartExecutor.DartCallback dartCallback = new DartExecutor.DartCallback(context.getAssets(), runArgs.bundlePath, cbInfo);
         isolate.engine.getDartExecutor().executeDartCallback(dartCallback);
     }
@@ -140,7 +142,7 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
     public void onListen(Object o, EventChannel.EventSink sink) {
         if (queuedIsolates.size() != 0) {
             IsolateHolder isolate = queuedIsolates.remove();
-        
+
             sink.success(isolate.isolateId);
             sink.endOfStream();
             activeIsolates.put(isolate.isolateId, isolate);
@@ -177,6 +179,19 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
             activeIsolates.get(isolateId).engine.destroy();
             activeIsolates.remove(isolateId);
+        } else if (call.method.equals("get_isolate_list")) {
+            final Set<String> runningIsolates = activeIsolates.keySet();
+            final List<String> outputList = new ArrayList<>(runningIsolates);
+
+            result.success(outputList);
+        } else if (call.method.equals("kill_all_isolates")) {
+            final Collection<IsolateHolder> runningIsolates = activeIsolates.values();
+
+            for (IsolateHolder holder : runningIsolates)
+                holder.engine.destroy();
+
+            queuedIsolates.clear();
+            activeIsolates.clear();
         } else {
             result.notImplemented();
         }

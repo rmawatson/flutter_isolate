@@ -10,7 +10,7 @@ void isolate2(String arg) {
     print("isolate2 temporary directory: $dir");
 
     await FlutterDownloader.initialize(debug: true);
-    FlutterDownloader.registerCallback(_MyAppState.downloaderCallback);
+    FlutterDownloader.registerCallback(AppWidget.downloaderCallback);
 
     final taskId = await FlutterDownloader.enqueue(
         url:
@@ -22,7 +22,7 @@ void isolate2(String arg) {
 }
 
 void isolate1(String arg) async {
-  /*final isolate =*/ await FlutterIsolate.spawn(isolate2, "hello2");
+  await FlutterIsolate.spawn(isolate2, "hello2");
 
   getTemporaryDirectory().then((dir) {
     print("isolate1 temporary directory: $dir");
@@ -41,6 +41,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Plugin example app'),
+            ),
+            body: AppWidget()));
+  }
+}
+
+class AppWidget extends StatelessWidget {
   static void downloaderCallback(
       String id, DownloadTaskStatus status, int progress) {
     print("progress: $progress");
@@ -66,18 +78,36 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Center(
-          child: ElevatedButton(
-            child: Text('Run'),
-            onPressed: _run,
-          ),
-        ),
+    return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      ElevatedButton(
+        child: Text('Spawn isolates'),
+        onPressed: _run,
       ),
-    );
+      ElevatedButton(
+        child: Text('Check running isolates'),
+        onPressed: () async {
+          final isolates = await FlutterIsolate.runningIsolates;
+          await showDialog(
+              builder: (ctx) {
+                return Center(child:Container(color:Colors.white, padding:EdgeInsets.all(5), child:Column(
+                    children:
+                        isolates.map((i) => Text(i)).cast<Widget>().toList() +
+                            [
+                              ElevatedButton(
+                                  child: Text("Close"),
+                                  onPressed: () {
+                                    Navigator.of(ctx).pop();
+                                  })
+                            ])));
+              },
+              context: context);
+        },
+      ),
+      ElevatedButton(
+        child: Text('Kill all running isolates'),
+        onPressed: () async {
+          await FlutterIsolate.killAll();
+        },)
+    ]);
   }
 }
