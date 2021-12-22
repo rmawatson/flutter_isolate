@@ -85,7 +85,18 @@ class FlutterIsolate {
   /// finished. This should cleanup the native components backing the isolates.
   void kill({int priority = Isolate.beforeNextEvent}) => _isolateId != null
       ? _control.invokeMethod("kill_isolate", {"isolate_id": _isolateId})
-      : Isolate.current.kill(priority:priority);
+      : Isolate.current.kill(priority: priority);
+
+  /// Will return a List of UUIDs representing all running isolates.
+  /// NOTE: You cannot kill them individually. This information
+  /// is only useful if you want to count the number of isolates
+  static Future<List<String>> get runningIsolates => _control
+      .invokeMethod<List<Object?>>("get_isolate_list")
+      .then((value) => value?.cast<String>() ?? []);
+
+  /// Will kill all running isolates and wait for it to complete.
+  /// It's useful if you want to hot reload an application.
+  static Future<void> killAll() => _control.invokeMethod('kill_all_isolates');
 
   String? _isolateId;
   static FlutterIsolate? _current;
