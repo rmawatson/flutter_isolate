@@ -12,6 +12,7 @@ FlutterIsolate allows creation of an Isolate in flutter that is able to use flut
 | FlutterIsolate.kill()             | :white_check_mark: |  :white_check_mark:  | kills a an isolate |
 | FlutterIsolate.killAll()             | :white_check_mark: |  :white_check_mark:  | kills all currently running  isolates |
 | FlutterIsolate.runningIsolates             | :white_check_mark: |  :white_check_mark:  | returns the IDs associated with all currently running isolates |
+| flutterCompute(callback,message)  | :white_check_mark: |  :white_check_mark:  | spawns a new FlutterIsolate, runs callback and returns the returned value |
 
 ### Usage
 
@@ -47,6 +48,18 @@ void main() async {
   runApp(MyApp());
 }
 ...
+```
+
+```dart
+Future<int> expansiveWork(int arg) async {
+  int result;
+  // lots of calculations
+  return result;
+}
+
+Future<int> doExpansiveWorkInBackground() async {
+  return await flutterCompute(expansiveWork, arg);
+}
 ```
 
 See [example/lib/main.dart](https://github.com/rmawatson/flutter_isolate/blob/master/example/lib/main.dart) for example usage with the [flutter_downloader plugin](https://pub.dev/packages/flutter_downloader).
