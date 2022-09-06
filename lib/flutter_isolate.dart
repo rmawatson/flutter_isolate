@@ -32,7 +32,7 @@ class FlutterIsolate {
         setupReceivePort.sendPort, isolateId);
     late StreamSubscription setupSubscription;
     setupSubscription = setupReceivePort.listen((data) {
-      final portSetup = (data as List<Capability?>);
+      final portSetup = (data as List<dynamic>);
       final setupPort = portSetup[0] as SendPort;
       final remoteIsolate = FlutterIsolate._(
           isolateId, portSetup[1] as SendPort?, portSetup[2], portSetup[3]);
@@ -111,6 +111,7 @@ class FlutterIsolate {
 
   static FlutterIsolate get current =>
       _current != null ? _current! : FlutterIsolate._();
+  @pragma('vm:entry-point')
   static void _isolateInitialize() {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -121,7 +122,7 @@ class FlutterIsolate {
           IsolateNameServer.lookupPortByName(_current!._isolateId!)!;
       final setupReceivePort = ReceivePort();
       IsolateNameServer.removePortNameMapping(_current!._isolateId!);
-      sendPort.send(<Capability?>[
+      sendPort.send(<dynamic>[
         setupReceivePort.sendPort,
         Isolate.current.controlPort,
         Isolate.current.pauseCapability,
@@ -144,4 +145,5 @@ class FlutterIsolate {
   }
 }
 
+@pragma('vm:entry-point')
 void _flutterIsolateEntryPoint() => FlutterIsolate._isolateInitialize();

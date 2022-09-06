@@ -5,6 +5,7 @@ import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
+@pragma('vm:entry-point')
 void isolate2(String arg) {
   getTemporaryDirectory().then((dir) async {
     print("isolate2 temporary directory: $dir");
@@ -21,6 +22,7 @@ void isolate2(String arg) {
       Duration(seconds: 1), (timer) => print("Timer Running From Isolate 2"));
 }
 
+@pragma('vm:entry-point')
 void isolate1(String arg) async {
   await FlutterIsolate.spawn(isolate2, "hello2");
 
