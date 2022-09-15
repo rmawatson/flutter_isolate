@@ -165,7 +165,14 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
     public void onMethodCall(MethodCall call, @NonNull Result result) {
         if (call.method.equals("spawn_isolate")) {
             IsolateHolder isolate = new IsolateHolder();
-            isolate.entryPoint = call.argument("entry_point");
+            final Object entryPoint = call.argument("entry_point");
+            if(entryPoint instanceof Long) {
+                isolate.entryPoint = (Long) entryPoint;
+            }
+
+            if(entryPoint instanceof Integer) {
+                isolate.entryPoint = Long.valueOf((Integer) entryPoint);
+            }
             isolate.isolateId = call.argument("isolate_id");
             isolate.result = result;
 
