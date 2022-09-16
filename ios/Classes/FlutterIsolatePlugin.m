@@ -13,13 +13,14 @@
 @implementation IsolateHolder
 @end
 
-static FlutterIsolatePlugin* instance = nil;
+static dispatch_once_t _initializeStaticPlugin = 0;
+static NSMutableArray<IsolateHolder*>* _queuedIsolates;
+static NSMutableDictionary<NSString*,IsolateHolder*>* _activeIsolates;
+
 
 @interface FlutterIsolatePlugin()
 @property(nonatomic) NSObject<FlutterPluginRegistrar> * registrar;
 @property(nonatomic) FlutterMethodChannel* controlChannel;
-@property(nonatomic) NSMutableArray<IsolateHolder*>* queuedIsolates;
-@property(nonatomic) NSMutableDictionary<NSString*,IsolateHolder*>* activeIsolates;
 @property FlutterEventSink sink;
 @end
 
@@ -30,10 +31,18 @@ static FlutterIsolatePlugin* instance = nil;
 
 @implementation FlutterIsolatePlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-
-    if (!instance) {
-        instance = [[FlutterIsolatePlugin alloc] init:registrar];
-    }
+    dispatch_once(&_initializeStaticPlugin, ^{
+        _queuedIsolates = [NSMutableArray<IsolateHolder*> new];
+        _activeIsolates = [NSMutableDictionary<NSString*,IsolateHolder*> new];
+    });
+    
+    FlutterIsolatePlugin *plugin = [[FlutterIsolatePlugin alloc] init];
+    
+    plugin.registrar = registrar;
+    
+    plugin.controlChannel = [FlutterMethodChannel methodChannelWithName:FLUTTER_ISOLATE_NAMESPACE @"/control"
+                                                        binaryMessenger:[registrar messenger]];
+    [registrar addMethodCallDelegate:plugin channel:plugin.controlChannel];
 }
 
 static NSString* _isolatePluginRegistrantClassName;
@@ -50,20 +59,6 @@ static NSString* _isolatePluginRegistrantClassName;
 }
 
 
-- (instancetype)init:(NSObject<FlutterPluginRegistrar>*)registrar {
-
-    //instance = self;
-    _controlChannel = [FlutterMethodChannel methodChannelWithName:FLUTTER_ISOLATE_NAMESPACE @"/control"
-            binaryMessenger:[registrar messenger]];
-    [registrar addMethodCallDelegate:self channel:_controlChannel];
-
-    _queuedIsolates = [NSMutableArray<IsolateHolder*> new];
-    _activeIsolates = [NSMutableDictionary<NSString*,IsolateHolder*> new];
-
-    _registrar = registrar;
-    return self;
-
-}
 
 - (void)startNextIsolate {
     IsolateHolder *isolate = _queuedIsolates.firstObject;
@@ -95,8 +90,6 @@ static NSString* _isolatePluginRegistrantClassName;
 
     [[FlutterIsolatePlugin lookupGeneratedPluginRegistrant] registerWithRegistry:isolate.engine];
 }
-
-
 
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
