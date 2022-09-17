@@ -51,13 +51,13 @@ void main() async {
 ```
 
 ```dart
-Future<int> expansiveWork(int arg) async {
+Future<int> expensiveWork(int arg) async {
   int result;
   // lots of calculations
   return result;
 }
 
-Future<int> doExpansiveWorkInBackground() async {
+Future<int> doExpensiveWorkInBackground() async {
   return await flutterCompute(expansiveWork, arg);
 }
 ```
