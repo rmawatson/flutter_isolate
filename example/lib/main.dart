@@ -33,6 +33,7 @@ void isolate1(String arg) async {
       Duration(seconds: 1), (timer) => print("Timer Running From Isolate 1"));
 }
 
+@pragma('vm:entry-point')
 void computeFunction(String arg) async {
   getTemporaryDirectory().then((dir) {
     print("Temporary directory in compute function : $dir with arg $arg");
