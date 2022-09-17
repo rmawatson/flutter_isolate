@@ -1,6 +1,10 @@
 # FlutterIsolate
 
-FlutterIsolate allows creation of an Isolate in flutter that is able to use flutter plugins. It creates the necessary platform specific bits (FlutterBackgroundView on android & FlutterEngine on iOS) to enable the platform channels to work inside an isolate.
+A Dart isolate is roughly equivalent to a single, independent execution thread. In a Flutter context, creating ("spawning") an isolate allows code execution without blocking the UI thread. This is important for expensive or long-running tasks that would otherwise slow down the front-end.
+
+However, code running in a regular Dart isolate will generally not be able to interact with Flutter plugins. This is due to the tight integration between the platform plugin scaffolding and the main application isolate.
+
+The FlutterIsolate plugin fixes this to allow the creation/spawning of new isolates that can interact with other Flutter plugins.
 
 ### FlutterIsolate API
 
@@ -16,10 +20,54 @@ FlutterIsolate allows creation of an Isolate in flutter that is able to use flut
 
 ### Usage
 
+To spawn a FlutterIsolate, call the `spawn` method with a top-level or static function that has been annotated with the `@pragma('vm:entry-point')` decorator:
+
+```dart
+import 'package:flutter_isolate/flutter_isolate.dart';
+
+@pragma('vm:entry-point')
+void someFunction(String arg) { 
+  print("Running in an isolate with argument : $arg");
+}
+...
+
+class SomeWidget() {
+...
+
+@override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+            child: Text('Run'),
+            onPressed: () {
+                FlutterIsolate.spawn(someFunction, "hello world");
+            },
+    );
+}
+```
+
+
+If you just want to spawn an isolate to perform a single task (like the [Flutter `compute` method](https://api.flutter.dev/flutter/foundation/compute-constant.html)), call `flutterCompute`:
+```dart
+@pragma('vm:entry-point')
+Future<int> expensiveWork(int arg) async {
+  int result;
+  // lots of calculations
+  return result;
+}
+
+Future<int> doExpensiveWorkInBackground() async {
+  return await flutterCompute(expansiveWork, arg);
+}
+```
+
+Isolates can also be spawned from other isolates:
+
+
 ```dart
 import 'package:flutter_startup/flutter_startup.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 
+@pragma('vm:entry-point')
 void isolate2(String arg) {
   FlutterStartup.startupReason.then((reason){
     print("Isolate2 $reason");
@@ -27,6 +75,7 @@ void isolate2(String arg) {
   Timer.periodic(Duration(seconds:1),(timer)=>print("Timer Running From Isolate 2"));
 }
 
+@pragma('vm:entry-point')
 void isolate1(String arg) async  {
 
   final isolate = await FlutterIsolate.spawn(isolate2, "hello2");
@@ -50,23 +99,12 @@ void main() async {
 ...
 ```
 
-```dart
-Future<int> expensiveWork(int arg) async {
-  int result;
-  // lots of calculations
-  return result;
-}
-
-Future<int> doExpensiveWorkInBackground() async {
-  return await flutterCompute(expansiveWork, arg);
-}
-```
-
 See [example/lib/main.dart](https://github.com/rmawatson/flutter_isolate/blob/master/example/lib/main.dart) for example usage with the [flutter_downloader plugin](https://pub.dev/packages/flutter_downloader).
 
-It is important to note that the entrypoint must be a top-level function:
+It is important to note that the entrypoint must be a top-level function, decorated with the `@pragma('vm:entry-point') annotation:
 
 ```dart
+@pragma('vm:entry-point')
 void topLevelFunction(Map<String, dynamic> args) {
   // performs work in an isolate
 }
@@ -98,7 +136,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
+  
+  @pragma('vm:entry-point')
   static void topLevelFunction(Map<String, dynamic> args) {
     // performs work in an isolate
   }
@@ -140,6 +179,8 @@ class _MyAppState extends State<MyApp> {
 }
 ```
 
+Failure to add the `@pragma('vm:entry-point')` annotation will cause the app to crash in release mode.
+
 ### Notes
 
 Due to a FlutterIsolate being backed by a platform specific 'view', the event loop will not terminate when there is no more 'user' work left to do and FlutterIsolates will require explict termination with kill().
@@ -151,6 +192,7 @@ Additionally this plugin has not been tested with a large range of plugins, only
 To pass data between isolates, a ReceivePort should be created on your (parent) isolate with the corresponding SendPort sent via the `spawn` method:
 
 ```dart
+@pragma('vm:entry-point')
 void spawnIsolate(SendPort port) {
   port.send("Hello!");
 }
