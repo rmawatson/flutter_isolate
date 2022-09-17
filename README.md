@@ -1,10 +1,10 @@
 # FlutterIsolate
 
-A Dart isolate is roughly equivalent to a single, independent execution thread. In a Flutter context, creating ("spawning") an isolate allows code execution without blocking the UI thread. This is important for expensive or long-running tasks that would otherwise slow down the front-end.
+A Dart isolate is roughly equivalent to a single, independent execution thread. In a Flutter context, creating ("spawning") an isolate allows code to execute outside the main thread, which is important for running expensive/long-running tasks that would otherwise block the UI.
 
-However, code running in a regular Dart isolate will generally not be able to interact with Flutter plugins. This is due to the tight integration between the platform plugin scaffolding and the main application isolate.
+However, code in a spawned isolate will generally not be able to interact with Flutter plugins. This is due to the tight integration between the platform plugin scaffolding and the main application isolate.
 
-The FlutterIsolate plugin fixes this to allow the creation/spawning of new isolates that can interact with other Flutter plugins.
+The FlutterIsolate plugin fixes this with the introduction of a `FlutterIsolate` class, which is a wrapper around the platform APIs for creating isolates and setting up the bindings necessary for code running in spawned isolates to communicate with Flutter plugins.
 
 ### FlutterIsolate API
 
