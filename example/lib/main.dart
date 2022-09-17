@@ -33,6 +33,12 @@ void isolate1(String arg) async {
       Duration(seconds: 1), (timer) => print("Timer Running From Isolate 1"));
 }
 
+void computeFunction(String arg) async {
+  getTemporaryDirectory().then((dir) {
+    print("Temporary directory in compute function : $dir with arg $arg");
+  });
+}
+
 void main() async {
   runApp(MyApp());
 }
@@ -109,7 +115,12 @@ class AppWidget extends StatelessWidget {
         child: Text('Kill all running isolates'),
         onPressed: () async {
           await FlutterIsolate.killAll();
-        },)
+        },),
+      ElevatedButton(
+        child: Text('Run in compute function'),
+        onPressed: () async {
+          await flutterCompute(computeFunction, "foo");
+        },),
     ]);
   }
 }
