@@ -1,3 +1,8 @@
+## 2.0.3
+* Fix release mode crashes on Flutter >3.3.0 
+* Fix occasional crash on Android due to incorrect casting
+* Add flutterCompute method
+
 ## 2.0.2
 * Fix bug on iOS when _isolatePluginRegistrantClassName was empty
 
