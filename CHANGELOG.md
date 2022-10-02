@@ -1,5 +1,5 @@
 ## 2.0.3
-* Fix release mode crashes on Flutter >3.3.0 
+* Fix release mode crashes on Flutter >3.3.0 - @pragma('vm:entry-point') must be added as a decorator to all entrypoint functions
 * Fix occasional crash on Android due to incorrect casting
 * Add flutterCompute method
 
