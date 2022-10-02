@@ -1,7 +1,7 @@
 #include "AppDelegate.h"
 #include "GeneratedPluginRegistrant.h"
 #include "FlutterIsolatePlugin.h"
-#import <path_provider/FLTPathProviderPlugin.h>
+#import <path_provider_ios/FLTPathProviderPlugin.h>
 #import <flutter_downloader/FlutterDownloaderPlugin.h>
 
 @interface IsolatePluginRegistrant : NSObject
