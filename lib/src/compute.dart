@@ -14,6 +14,7 @@ import 'package:flutter_isolate/flutter_isolate.dart';
 /// Both the return type and the [message] type must be supported by
 /// [SendPort.send] stated in
 /// https://api.dart.dev/stable/dart-isolate/SendPort/send.html
+@pragma('vm:entry-point')
 Future<T> flutterCompute<T, U>(
     FutureOr<T> Function(U message) callback, U message) async {
   final callbackHandle =
@@ -57,6 +58,7 @@ enum _Status {
   error,
 }
 
+@pragma('vm:entry-point')
 Future<void> _isolateMain(Map<String, dynamic> config) async {
   final port = config["port"] as SendPort;
   try {
