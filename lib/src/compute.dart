@@ -57,6 +57,7 @@ enum _Status {
   error,
 }
 
+@pragma('vm:entry-point')
 Future<void> _isolateMain(Map<String, dynamic> config) async {
   final port = config["port"] as SendPort;
   try {
