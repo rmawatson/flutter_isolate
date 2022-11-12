@@ -1,3 +1,7 @@
+## 2.0.4
+* Fix crashes in release mode when using new flutterCompute method
+* Migrate Android jCenter to Maven Central
+
 ## 2.0.3
 * Fix release mode crashes on Flutter >3.3.0 - @pragma('vm:entry-point') must be added as a decorator to all entrypoint functions
 * Fix occasional crash on Android due to incorrect casting
