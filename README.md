@@ -56,7 +56,7 @@ Future<int> expensiveWork(int arg) async {
 }
 
 Future<int> doExpensiveWorkInBackground() async {
-  return await flutterCompute(expansiveWork, arg);
+  return await flutterCompute(expensiveWork, arg);
 }
 ```
 
