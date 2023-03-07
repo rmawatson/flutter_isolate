@@ -184,7 +184,11 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         } else if (call.method.equals("kill_isolate")) {
             String isolateId = call.argument("isolate_id");
 
-            activeIsolates.get(isolateId).engine.destroy();
+            try {
+                activeIsolates.get(isolateId).engine.destroy();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             activeIsolates.remove(isolateId);
             result.success(true);
         } else if (call.method.equals("get_isolate_list")) {
