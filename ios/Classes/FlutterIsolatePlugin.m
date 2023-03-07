@@ -112,7 +112,7 @@ static NSString* _isolatePluginRegistrantClassName;
           ((void(*)(id,SEL))objc_msgSend)(_activeIsolates[isolateId].engine, @selector(destroyContext));
 
       [_activeIsolates removeObjectForKey:isolateId];
-
+      result(nil);
   } else if ([@"get_isolate_list" isEqualToString:call.method]) {
       NSArray *output = [_activeIsolates allKeys];
       result(output);
@@ -123,6 +123,7 @@ static NSString* _isolatePluginRegistrantClassName;
       }
       [_activeIsolates removeAllObjects];
       [_queuedIsolates removeAllObjects];
+      result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
