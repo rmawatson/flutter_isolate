@@ -184,8 +184,13 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         } else if (call.method.equals("kill_isolate")) {
             String isolateId = call.argument("isolate_id");
 
-            activeIsolates.get(isolateId).engine.destroy();
+            try {
+                activeIsolates.get(isolateId).engine.destroy();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             activeIsolates.remove(isolateId);
+            result.success(true);
         } else if (call.method.equals("get_isolate_list")) {
             final Set<String> runningIsolates = activeIsolates.keySet();
             final List<String> outputList = new ArrayList<>(runningIsolates);
@@ -199,6 +204,7 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
             queuedIsolates.clear();
             activeIsolates.clear();
+            result.success(true);
         } else {
             result.notImplemented();
         }
