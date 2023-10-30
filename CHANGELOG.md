@@ -1,3 +1,6 @@
+## 2.0.5
+* Increase supported `uuid` version range
+
 ## 2.0.4
 * Fix crashes in release mode when using new flutterCompute method
 * Migrate Android jCenter to Maven Central

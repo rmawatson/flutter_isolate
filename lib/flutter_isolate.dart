@@ -26,7 +26,7 @@ class FlutterIsolate {
       void entryPoint(T message), T message) async {
     final userEntryPointId =
         PluginUtilities.getCallbackHandle(entryPoint)!.toRawHandle();
-    final isolateId = Uuid().v4();
+    final isolateId = const Uuid().v4();
     final isolateResult = Completer<FlutterIsolate>();
     final setupReceivePort = ReceivePort();
 
