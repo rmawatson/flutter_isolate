@@ -1,4 +1,4 @@
-## 2.0.5
+## 2.0.5-pre
 * Increase supported `uuid` version range
 
 ## 2.0.4
