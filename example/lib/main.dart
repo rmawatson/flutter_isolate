@@ -62,8 +62,7 @@ class _MyAppState extends State<MyApp> {
 }
 
 class AppWidget extends StatelessWidget {
-  static void downloaderCallback(
-      String id, DownloadTaskStatus status, int progress) {
+  static void downloaderCallback(String id, int status, int progress) {
     print("progress: $progress");
   }
 
@@ -98,16 +97,22 @@ class AppWidget extends StatelessWidget {
           final isolates = await FlutterIsolate.runningIsolates;
           await showDialog(
               builder: (ctx) {
-                return Center(child:Container(color:Colors.white, padding:EdgeInsets.all(5), child:Column(
-                    children:
-                        isolates.map((i) => Text(i)).cast<Widget>().toList() +
-                            [
-                              ElevatedButton(
-                                  child: Text("Close"),
-                                  onPressed: () {
-                                    Navigator.of(ctx).pop();
-                                  })
-                            ])));
+                return Center(
+                    child: Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.all(5),
+                        child: Column(
+                            children: isolates
+                                    .map((i) => Text(i))
+                                    .cast<Widget>()
+                                    .toList() +
+                                [
+                                  ElevatedButton(
+                                      child: Text("Close"),
+                                      onPressed: () {
+                                        Navigator.of(ctx).pop();
+                                      })
+                                ])));
               },
               context: context);
         },
@@ -116,12 +121,14 @@ class AppWidget extends StatelessWidget {
         child: Text('Kill all running isolates'),
         onPressed: () async {
           await FlutterIsolate.killAll();
-        },),
+        },
+      ),
       ElevatedButton(
         child: Text('Run in compute function'),
         onPressed: () async {
           await flutterCompute(computeFunction, "foo");
-        },),
+        },
+      ),
     ]);
   }
 }
