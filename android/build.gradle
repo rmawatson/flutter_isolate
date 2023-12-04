@@ -26,7 +26,6 @@ android {
     if (project.android.hasProperty("namespace")) {
         namespace 'com.rmawatson.flutterisolate'
     }
-    namespace "com.rmawatson.flutterisolate"
 
     compileSdkVersion 30
 
