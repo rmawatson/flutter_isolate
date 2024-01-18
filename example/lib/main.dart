@@ -1,25 +1,22 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 @pragma('vm:entry-point')
 void isolate2(String arg) {
-  HttpClient? httpClient;
-  HttpClientRequest? request;
-  var url = Uri.parse('https://raw.githubusercontent.com/rmawatson/flutter_isolate/master/README.md');
-
   getTemporaryDirectory().then((dir) async {
-    print("isolate2 downloading $url");
-    httpClient?.close(); 
-    request?.close();
-    httpClient = HttpClient();
-    request = await httpClient!.getUrl(url);
-    print("downloaded the file.");
-  }).catchError((e) {
-    print(e);
+    print("isolate2 temporary directory: $dir");
+
+    await FlutterDownloader.initialize(debug: true);
+    FlutterDownloader.registerCallback(AppWidget.downloaderCallback);
+
+    var url = 'https://raw.githubusercontent.com/rmawatson/flutter_isolate/master/README.md';
+
+    // ignore: unused_local_variable
+    final taskId = await FlutterDownloader.enqueue(url: url, savedDir: dir.path);
   });
   Timer.periodic(Duration(seconds: 1), (timer) => print("Timer Running From Isolate 2"));
 }
@@ -87,59 +84,61 @@ class AppWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 30),
-          child: ElevatedButton(
-            child: Text('Spawn isolates'),
-            onPressed: _run,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 30),
-          child: ElevatedButton(
-            child: Text('Check running isolates'),
-            onPressed: () async {
-              final isolates = await FlutterIsolate.runningIsolates;
-              await showDialog(
-                  builder: (ctx) {
-                    return Center(
-                        child: Container(
-                            color: Colors.white,
-                            padding: EdgeInsets.all(5),
-                            child: Column(
-                                children: isolates.map((i) => Text(i)).cast<Widget>().toList() +
-                                    [
-                                      ElevatedButton(
-                                          child: Text("Close"),
-                                          onPressed: () {
-                                            Navigator.of(ctx).pop();
-                                          })
-                                    ])));
-                  },
-                  context: context);
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 30),
-          child: ElevatedButton(
-            child: Text('Kill all running isolates'),
-            onPressed: () async {
-              await FlutterIsolate.killAll();
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 30),
-          child: ElevatedButton(
-            child: Text('Run in compute function'),
-            onPressed: () async {
-              await flutterCompute(computeFunction, "foo");
-            },
-          ),
-        ),
-      ]),
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 30),
+              child: ElevatedButton(
+                child: Text('Spawn isolates'),
+                onPressed: _run,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 30),
+              child: ElevatedButton(
+                child: Text('Check running isolates'),
+                onPressed: () async {
+                  final isolates = await FlutterIsolate.runningIsolates;
+                  await showDialog(
+                      builder: (ctx) {
+                        return Center(
+                            child: Container(
+                                color: Colors.white,
+                                padding: EdgeInsets.all(5),
+                                child: Column(
+                                    children: isolates.map((i) => Text(i)).cast<Widget>().toList() +
+                                        [
+                                          ElevatedButton(
+                                              child: Text("Close"),
+                                              onPressed: () {
+                                                Navigator.of(ctx).pop();
+                                              })
+                                        ])));
+                      },
+                      context: context);
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 30),
+              child: ElevatedButton(
+                child: Text('Kill all running isolates'),
+                onPressed: () async {
+                  await FlutterIsolate.killAll();
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 30),
+              child: ElevatedButton(
+                child: Text('Run in compute function'),
+                onPressed: () async {
+                  await flutterCompute(computeFunction, "foo");
+                },
+              ),
+            ),
+          ]),
     );
   }
 }
