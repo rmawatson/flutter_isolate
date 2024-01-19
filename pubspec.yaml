@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  uuid: ">=3.0.3 <5.0.0"
 
 flutter:
   plugin:
