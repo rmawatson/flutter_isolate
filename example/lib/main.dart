@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
@@ -6,17 +7,22 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 
 @pragma('vm:entry-point')
+void _flutterIsolateEntryPoint() => FlutterIsolate.macosIsolateInitialize();
+
+@pragma('vm:entry-point')
 void isolate2(String arg) {
   getTemporaryDirectory().then((dir) async {
     print("isolate2 temporary directory: $dir");
 
-    await FlutterDownloader.initialize(debug: true);
-    FlutterDownloader.registerCallback(AppWidget.downloaderCallback);
+    if (Platform.isMacOS == false) {
+      await FlutterDownloader.initialize(debug: true);
+      FlutterDownloader.registerCallback(AppWidget.downloaderCallback);
 
-    var url = 'https://raw.githubusercontent.com/rmawatson/flutter_isolate/master/README.md';
+      var url = 'https://raw.githubusercontent.com/rmawatson/flutter_isolate/master/README.md';
 
-    // ignore: unused_local_variable
-    final taskId = await FlutterDownloader.enqueue(url: url, savedDir: dir.path);
+      // ignore: unused_local_variable
+      final taskId = await FlutterDownloader.enqueue(url: url, savedDir: dir.path);
+    }
   });
   Timer.periodic(Duration(seconds: 1), (timer) => print("Timer Running From Isolate 2"));
 }

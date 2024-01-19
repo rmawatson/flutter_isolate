@@ -111,8 +111,14 @@ class FlutterIsolate {
       this.pauseCapability,
       this.terminateCapability]);
 
+  @pragma('vm:entry-point')
+  static macosIsolateInitialize() {
+    _isolateInitialize();
+  }
+
   static FlutterIsolate get current =>
       _current != null ? _current! : FlutterIsolate._();
+
   @pragma('vm:entry-point')
   static void _isolateInitialize() {
     WidgetsFlutterBinding.ensureInitialized();
