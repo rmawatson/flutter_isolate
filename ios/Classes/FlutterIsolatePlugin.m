@@ -68,26 +68,19 @@ static NSString* _isolatePluginRegistrantClassName;
 
     FlutterCallbackInformation *info = [FlutterCallbackCache lookupCallbackInformation:isolate.entryPoint];
 
-    isolate.engine = [self.engineGroup makeEngineWithEntrypoint:info.callbackName libraryURI:info.callbackLibraryPath];
+    isolate.engine = [[self.engineGroup makeEngineWithEntrypoint:info.callbackName libraryURI:info.callbackLibraryPath]
+        initWithName:isolate.isolateId project:nil allowHeadlessExecution:YES];
 
-    if ([isolate.engine respondsToSelector:@selector(initWithName:project:allowHeadlessExecution:)]) {
-        // use headless execution, if we can
-        ((id(*)(id,SEL,id,id,id))objc_msgSend)(isolate.engine, @selector(initWithName:project:allowHeadlessExecution:) , isolate.isolateId, nil, @(YES));
-    } else {
-        // older versions before above is available
-        [isolate.engine initWithName:isolate.isolateId project:nil];
-    }
-
-    /* not entire sure if a listen on an event channel will be queued
-     * as we cannot register the event channel until after runWithEntryPoint has been called. If it is not queued
-     * then this will be a race on the FlutterEventChannels initialization, and could deadlock. */
+    // not entire sure if a listen on an event channel will be queued
+    // as we cannot register the event channel until after runWithEntryPoint has been called. If it is not queued
+    // then this will be a race on the FlutterEventChannels initialization, and could deadlock.
     [isolate.engine runWithEntrypoint:info.callbackName libraryURI:info.callbackLibraryPath];
 
     isolate.controlChannel = [FlutterMethodChannel methodChannelWithName:FLUTTER_ISOLATE_NAMESPACE @"/control"
-                                         binaryMessenger:isolate.engine];
+                                                         binaryMessenger:isolate.engine.binaryMessenger];
 
     isolate.startupChannel = [FlutterEventChannel eventChannelWithName:FLUTTER_ISOLATE_NAMESPACE @"/event"
-                                                         binaryMessenger:isolate.engine];
+                                                       binaryMessenger:isolate.engine.binaryMessenger];
 
     [isolate.startupChannel setStreamHandler:self];
     [_registrar addMethodCallDelegate:self channel:isolate.controlChannel];

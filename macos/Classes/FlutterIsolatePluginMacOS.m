@@ -79,7 +79,6 @@ static NSString* _isolatePluginRegistrantClassName;
      * then this will be a race on the FlutterEventChannels initialization, and could deadlock. */
     [isolate.engine runWithEntrypoint:@"_flutterIsolateEntryPoint"];
 
-
     isolate.controlChannel = [FlutterMethodChannel methodChannelWithName:FLUTTER_ISOLATE_NAMESPACE @"/control"
                                          binaryMessenger:isolate.engine.binaryMessenger];
 
@@ -87,6 +86,7 @@ static NSString* _isolatePluginRegistrantClassName;
                                                          binaryMessenger:isolate.engine.binaryMessenger];
 
     [isolate.startupChannel setStreamHandler:self];
+    
     [_registrar addMethodCallDelegate:self channel:isolate.controlChannel];
 
     [[FlutterIsolatePluginMacOS lookupGeneratedPluginRegistrant] registerWithRegistry:isolate.engine];
