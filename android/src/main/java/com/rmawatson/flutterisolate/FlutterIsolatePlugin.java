@@ -17,6 +17,7 @@ import java.util.Set;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.FlutterEngineGroup;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
@@ -50,6 +51,7 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
     private Queue<IsolateHolder> queuedIsolates;
     private Map<String, IsolateHolder> activeIsolates;
     private Context context;
+    private FlutterEngineGroup engineGroup;
 
     private static void registerWithCustomRegistrant(io.flutter.embedding.engine.FlutterEngine flutterEngine) {
         if (registrant == null) return;
@@ -94,6 +96,7 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {
+        engineGroup = new FlutterEngineGroup(binding.getApplicationContext()); 
         setupChannel(binding.getBinaryMessenger(), binding.getApplicationContext());
     }
 
@@ -115,14 +118,13 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
 
         FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null);
 
-        isolate.engine = new FlutterEngine(context);
-
         FlutterCallbackInformation cbInfo = FlutterCallbackInformation.lookupCallbackInformation(isolate.entryPoint);
-        FlutterRunArguments runArgs = new FlutterRunArguments();
 
-        runArgs.bundlePath = FlutterInjector.instance().flutterLoader().findAppBundlePath();
-        runArgs.libraryPath = cbInfo.callbackLibraryPath;
-        runArgs.entrypoint = cbInfo.callbackName;
+        isolate.engine = engineGroup.createAndRunEngine(context, new DartExecutor.DartEntrypoint(
+            FlutterInjector.instance().flutterLoader().findAppBundlePath(),
+            cbInfo.callbackLibraryPath,
+            cbInfo.callbackName
+        ));
 
         isolate.controlChannel = new MethodChannel(isolate.engine.getDartExecutor().getBinaryMessenger(), NAMESPACE + "/control");
         isolate.startupChannel = new EventChannel(isolate.engine.getDartExecutor().getBinaryMessenger(), NAMESPACE + "/event");
@@ -133,9 +135,6 @@ public class FlutterIsolatePlugin implements FlutterPlugin, MethodCallHandler, S
         if (registrant != null) {
             registerWithCustomRegistrant(isolate.engine);
         }
-
-        DartExecutor.DartCallback dartCallback = new DartExecutor.DartCallback(context.getAssets(), runArgs.bundlePath, cbInfo);
-        isolate.engine.getDartExecutor().executeDartCallback(dartCallback);
     }
 
     @Override
