@@ -275,3 +275,66 @@ public class MainApplication extends FlutterApplication {
   }
 }
 ```
+
+#### MacOS
+
+Due to limmitations on MacOS (see https://github.com/flutter/flutter/issues/65222), you need to put this code in your `lib/main.dart` file
+
+**lib/main.dart**
+```
+@pragma('vm:entry-point')
+void _flutterIsolateEntryPoint() => FlutterIsolate.macosIsolateInitialize();
+```
+
+**You also need to manually fix plugin registration .**
+
+On iOS, Flutter automatically generates a file `GeneratedPluginRegistrant.m` during build that registers all native code plugins during app start. This allows Flutter to find the platform channels.
+
+The generated file looks something like this:
+
+**GeneratedPluginRegistrant.m**
+```
+//
+//  Generated file. Do not edit.
+//
+
+// clang-format off
+
+#import "GeneratedPluginRegistrant.h"
+
+#if __has_include(<flutter_downloader/FlutterDownloaderPlugin.h>)
+#import <flutter_downloader/FlutterDownloaderPlugin.h>
+#else
+@import flutter_downloader;
+#endif
+
+#if __has_include(<path_provider_foundation/PathProviderPlugin.h>)
+#import <path_provider_foundation/PathProviderPlugin.h>
+#else
+@import path_provider_foundation;
+#endif
+
+@implementation GeneratedPluginRegistrant
+
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
+  [FlutterDownloaderPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterDownloaderPlugin"]];
+  [PathProviderPlugin registerWithRegistrar:[registry registrarForPlugin:@"PathProviderPlugin"]];
+}
+
+@end
+```
+
+On iOS, this generated file uses Objective-C so `flutter_isolate` can find it using `NSClassFromString(@"GeneratedPluginRegistrant")`.
+
+However, on macOS, this generated file uses Swift & does not use a class, so `NSClassFromString` will not work.
+
+In order to fix plugin registration on MacOS, you need to follow these steps.
+
+1. copy `ios/runner/GeneratedPluginRegistrant.m` from iOS and copy it to `macos/runner/GeneratedPluginRegistrant.m`
+2. copy `ios/runner/GeneratedPluginRegistrant.h` from iOS and copy it to `macos/runner/GeneratedPluginRegistrant.h`
+3. open Xcode, right click on "Runner" -> "Add Files to Runner" and add macos files from steps 1 & 2
+4. delete plugins from `macos/runner/GeneratedPluginRegistrant.m` if they do not support macos
+
+See the example app for a demonstration of this.
+
+
