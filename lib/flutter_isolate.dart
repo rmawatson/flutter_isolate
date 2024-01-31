@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:math';
 import 'dart:ui';
 
-import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -22,22 +22,18 @@ class FlutterIsolate {
   /// as the current isolate. The spawned isolate will be able to use flutter
   /// plugins. T can be any type that can be normally be passed through to
   /// regular isolate's entry point.
-  static Future<FlutterIsolate> spawn<T>(
-      void entryPoint(T message), T message) async {
-    final userEntryPointId =
-        PluginUtilities.getCallbackHandle(entryPoint)!.toRawHandle();
-    final isolateId = const Uuid().v4();
+  static Future<FlutterIsolate> spawn<T>(void entryPoint(T message), T message) async {
+    final userEntryPointId = PluginUtilities.getCallbackHandle(entryPoint)!.toRawHandle();
+    final isolateId = uuid();
     final isolateResult = Completer<FlutterIsolate>();
     final setupReceivePort = ReceivePort();
 
-    IsolateNameServer.registerPortWithName(
-        setupReceivePort.sendPort, isolateId);
+    IsolateNameServer.registerPortWithName(setupReceivePort.sendPort, isolateId);
     late StreamSubscription setupSubscription;
     setupSubscription = setupReceivePort.listen((data) {
       final portSetup = (data as List<dynamic>);
       final setupPort = portSetup[0] as SendPort;
-      final remoteIsolate = FlutterIsolate._(
-          isolateId, portSetup[1] as SendPort?, portSetup[2], portSetup[3]);
+      final remoteIsolate = FlutterIsolate._(isolateId, portSetup[1] as SendPort?, portSetup[2], portSetup[3]);
 
       setupPort.send(<Object?>[userEntryPointId, message]);
 
@@ -46,26 +42,20 @@ class FlutterIsolate {
       isolateResult.complete(remoteIsolate);
     });
     _control.invokeMethod("spawn_isolate", {
-      "entry_point":
-          PluginUtilities.getCallbackHandle(_flutterIsolateEntryPoint)!
-              .toRawHandle(),
+      "entry_point": PluginUtilities.getCallbackHandle(_flutterIsolateEntryPoint)!.toRawHandle(),
       "isolate_id": isolateId
     });
     return isolateResult.future;
   }
 
-  bool get _isCurrentIsolate =>
-      _isolateId == null ||
-      _current != null && _current!._isolateId == _isolateId;
+  bool get _isCurrentIsolate => _isolateId == null || _current != null && _current!._isolateId == _isolateId;
 
   /// Requests the isolate to pause. This uses the underlying isolates pause
   /// implementation to pause the isolate from with the pausing isolate
   /// otherwises uses a SendPort to pass through a pause requres to the target
   void pause() => _isCurrentIsolate
       ? Isolate.current.pause()
-      : Isolate(controlPort!,
-              pauseCapability: pauseCapability,
-              terminateCapability: terminateCapability)
+      : Isolate(controlPort!, pauseCapability: pauseCapability, terminateCapability: terminateCapability)
           .pause(pauseCapability);
 
   /// Requests the isolate to resume. This uses the underlying isolates resume
@@ -74,9 +64,7 @@ class FlutterIsolate {
   /// ports will not be serviced when an isolate is paused.
   void resume() => _isCurrentIsolate
       ? Isolate.current.resume(Capability())
-      : Isolate(controlPort!,
-              pauseCapability: pauseCapability,
-              terminateCapability: terminateCapability)
+      : Isolate(controlPort!, pauseCapability: pauseCapability, terminateCapability: terminateCapability)
           .resume(pauseCapability!);
 
   /// Requestes to terminate the flutter isolate. As the isolate that is
@@ -92,9 +80,8 @@ class FlutterIsolate {
   /// Will return a List of UUIDs representing all running isolates.
   /// NOTE: You cannot kill them individually. This information
   /// is only useful if you want to count the number of isolates
-  static Future<List<String>> get runningIsolates => _control
-      .invokeMethod<List<Object?>>("get_isolate_list")
-      .then((value) => value?.cast<String>() ?? []);
+  static Future<List<String>> get runningIsolates =>
+      _control.invokeMethod<List<Object?>>("get_isolate_list").then((value) => value?.cast<String>() ?? []);
 
   /// Will kill all running isolates and wait for it to complete.
   /// It's useful if you want to hot reload an application.
@@ -105,14 +92,15 @@ class FlutterIsolate {
   static final _control = MethodChannel("com.rmawatson.flutterisolate/control");
   static final _event = EventChannel("com.rmawatson.flutterisolate/event");
 
-  FlutterIsolate._(
-      [this._isolateId,
-      this.controlPort,
-      this.pauseCapability,
-      this.terminateCapability]);
+  FlutterIsolate._([this._isolateId, this.controlPort, this.pauseCapability, this.terminateCapability]);
 
-  static FlutterIsolate get current =>
-      _current != null ? _current! : FlutterIsolate._();
+  @pragma('vm:entry-point')
+  static macosIsolateInitialize() {
+    _isolateInitialize();
+  }
+
+  static FlutterIsolate get current => _current != null ? _current! : FlutterIsolate._();
+
   @pragma('vm:entry-point')
   static void _isolateInitialize() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -120,8 +108,7 @@ class FlutterIsolate {
     late StreamSubscription eventSubscription;
     eventSubscription = _event.receiveBroadcastStream().listen((isolateId) {
       _current = FlutterIsolate._(isolateId, null, null);
-      final sendPort =
-          IsolateNameServer.lookupPortByName(_current!._isolateId!)!;
+      final sendPort = IsolateNameServer.lookupPortByName(_current!._isolateId!)!;
       final setupReceivePort = ReceivePort();
       IsolateNameServer.removePortNameMapping(_current!._isolateId!);
       sendPort.send(<dynamic>[
@@ -137,13 +124,35 @@ class FlutterIsolate {
         final args = data as List<Object?>;
         final userEntryPointHandle = args[0] as int;
         final userMessage = args[1];
-        Function userEntryPoint = PluginUtilities.getCallbackFromHandle(
-            CallbackHandle.fromRawHandle(userEntryPointHandle))!;
+        Function userEntryPoint =
+            PluginUtilities.getCallbackFromHandle(CallbackHandle.fromRawHandle(userEntryPointHandle))!;
         setupSubscription.cancel();
         setupReceivePort.close();
         userEntryPoint(userMessage);
       });
     });
+  }
+
+  static String uuid() {
+    var random = Random();
+    Uint8List bytes = Uint8List(16);
+    for (int i = 0; i < 16; i++) {
+      bytes[i] = random.nextInt(256);
+    }
+
+    // Set the version and the variant
+    bytes[6] = (bytes[6] & 0x0f) | 0x40; // Version 4
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // Variant 10
+
+    var uuid = bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
+
+    var a = uuid.substring(0, 8);
+    var b = uuid.substring(8, 12);
+    var c = uuid.substring(12, 16);
+    var d = uuid.substring(16, 20);
+    var e = uuid.substring(20);
+
+    return '$a-$b-$c-$d-$e}';
   }
 }
 
