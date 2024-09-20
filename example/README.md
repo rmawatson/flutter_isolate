@@ -2,7 +2,7 @@
 
 Starts an isolate that launches a second isolate. Both call out to a plugin that uses a method channel on both iOS and android to get the startup reason.
 
-The first isolate is paused after 5 seconds, paused after 10, and killed after 20 seconds. The second continues to print forever.
+The first isolate is paused after 5 seconds, resumed after 10, and killed after 20 seconds. The second continues to print forever.
 ```
 import 'package:flutter_startup/flutter_startup.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
